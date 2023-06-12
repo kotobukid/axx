@@ -1,0 +1,5 @@
+### post create user
+POST http://192.168.33.10:3000/users
+content-type: application/json
+
+{"username": "taro"}
