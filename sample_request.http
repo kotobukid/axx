@@ -3,3 +3,10 @@ POST http://192.168.33.10:3000/users
 content-type: application/json
 
 {"username": "taro"}
+
+### post create user invalid json
+POST http://192.168.33.10:3000/users
+content-type: application/json
+
+{"username": "taro}
+
