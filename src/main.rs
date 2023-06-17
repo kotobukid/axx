@@ -3,8 +3,9 @@ use axum::{
     Json,
     Router,
     http::StatusCode,
-    response::IntoResponse,
+    response::{IntoResponse, Html},
 };
+use axum::extract::Form;
 use std::net::SocketAddr;
 use std::env;
 use serde::{Deserialize, Serialize};
@@ -29,6 +30,8 @@ async fn main() {
 fn create_app() -> Router {
     Router::new().route("/", get(root))
         .route("/users", post(create_user))
+        .route("/login", post(login_process))
+        .route("/login", get(login_form))
 }
 
 async fn root() -> &'static str {
@@ -42,6 +45,25 @@ async fn create_user(Json(payload): Json<CreateUser>) -> impl IntoResponse {
     };
 
     (StatusCode::CREATED, Json(user))
+}
+
+async fn login_form() -> impl IntoResponse {
+    (StatusCode::OK, Html(r#"<form method="post" action="">
+    <label><span>ID:</span><input type="text" name="login_id" /></label>
+    <br /><label><span>Password:</span><input type="password" name="password"/ ></label>
+    <br /><input type="submit" name="submit" value="SUBMIT" />
+    </form>"#))
+}
+
+#[derive(Deserialize, Debug)]
+struct LoginInfo {
+    login_id: String,
+    password: String,
+}
+
+async fn login_process(Form(payload): Form<LoginInfo>) -> impl IntoResponse {
+    println!("{:?}", payload);
+    (StatusCode::OK, Html("OK"))
 }
 
 #[derive(Deserialize)]
