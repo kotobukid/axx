@@ -41,6 +41,6 @@ pub struct CreateUser {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct User {
-    id: u64,
-    username: String,
+    pub id: u64,
+    pub username: String,
 }

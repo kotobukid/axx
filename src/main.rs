@@ -51,6 +51,7 @@ mod test {
         http::{header, Method, Request},
     };
     use tower::ServiceExt;
+    use crate::auth::User;
 
     #[tokio::test]
     async fn should_return_hello_world() {
