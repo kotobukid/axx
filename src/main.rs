@@ -28,14 +28,14 @@ async fn main() {
 }
 
 fn create_app() -> Router {
-    Router::new().route("/", get(root))
+    Router::new()
+        .route("/", get(root))
         .route("/users", post(create_user))
-        .route("/login", post(login_process))
-        .route("/login", get(login_form))
+        .route("/login/", get(login_form).post(login_process))
 }
 
-async fn root() -> &'static str {
-    "Hello, world"
+async fn root() -> impl IntoResponse {
+    (StatusCode::OK, Html(r#"<h1>Hello, world</h1><br /><a href="/login/">Login</a>"#))
 }
 
 async fn create_user(Json(payload): Json<CreateUser>) -> impl IntoResponse {
