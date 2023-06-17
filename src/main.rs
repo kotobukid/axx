@@ -1,15 +1,16 @@
+mod auth;
 use axum::{
     routing::{get, post},
-    Json,
     Router,
     http::{StatusCode},
     response::{IntoResponse, Html},
 };
-use axum::extract::Form;
+
 use std::net::SocketAddr;
 use std::env;
-use serde::{Deserialize, Serialize};
+
 use tower_http::services::ServeDir;
+use crate::auth::{create_user, login_form, login_process};
 
 
 #[tokio::main]
@@ -40,45 +41,6 @@ fn create_app() -> Router {
 
 async fn root() -> impl IntoResponse {
     (StatusCode::OK, Html(r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#))
-}
-
-async fn create_user(Json(payload): Json<CreateUser>) -> impl IntoResponse {
-    let user = User {
-        id: 1337,
-        username: payload.username,
-    };
-
-    (StatusCode::CREATED, Json(user))
-}
-
-async fn login_form() -> impl IntoResponse {
-    (StatusCode::OK, Html(r#"<form method="post" action="">
-    <label><span>ID:</span><input type="text" name="login_id" /></label>
-    <br /><label><span>Password:</span><input type="password" name="password"/ ></label>
-    <br /><input type="submit" name="submit" value="SUBMIT" />
-    </form>"#))
-}
-
-#[derive(Deserialize, Debug)]
-struct LoginInfo {
-    login_id: String,
-    password: String,
-}
-
-async fn login_process(Form(payload): Form<LoginInfo>) -> impl IntoResponse {
-    println!("ID: {} / Pass: {}", payload.login_id, payload.password);
-    (StatusCode::OK, Html("OK"))
-}
-
-#[derive(Deserialize)]
-struct CreateUser {
-    username: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-struct User {
-    id: u64,
-    username: String,
 }
 
 #[cfg(test)]
