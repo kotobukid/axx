@@ -2,13 +2,15 @@ use axum::{
     routing::{get, post},
     Json,
     Router,
-    http::StatusCode,
+    http::{StatusCode},
     response::{IntoResponse, Html},
 };
 use axum::extract::Form;
 use std::net::SocketAddr;
 use std::env;
 use serde::{Deserialize, Serialize};
+use tower_http::services::ServeDir;
+
 
 #[tokio::main]
 async fn main() {
@@ -16,6 +18,7 @@ async fn main() {
 
     env::set_var("RUST_LOG", log_level);
     tracing_subscriber::fmt::init();
+
 
     let app = create_app();
     let addr: SocketAddr = SocketAddr::from(([192, 168, 33, 10], 3000));
@@ -32,10 +35,11 @@ fn create_app() -> Router {
         .route("/", get(root))
         .route("/users", post(create_user))
         .route("/login/", get(login_form).post(login_process))
+        .nest_service("/static", ServeDir::new("static"))
 }
 
 async fn root() -> impl IntoResponse {
-    (StatusCode::OK, Html(r#"<h1>Hello, world</h1><br /><a href="/login/">Login</a>"#))
+    (StatusCode::OK, Html(r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#))
 }
 
 async fn create_user(Json(payload): Json<CreateUser>) -> impl IntoResponse {
@@ -62,7 +66,7 @@ struct LoginInfo {
 }
 
 async fn login_process(Form(payload): Form<LoginInfo>) -> impl IntoResponse {
-    println!("{:?}", payload);
+    println!("ID: {} / Pass: {}", payload.login_id, payload.password);
     (StatusCode::OK, Html("OK"))
 }
 
@@ -94,7 +98,7 @@ mod test {
         let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
 
         let body: String = String::from_utf8(bytes.to_vec()).unwrap();
-        assert_eq!(body, r#"<h1>Hello, world</h1><br /><a href="/login/">Login</a>"#);
+        assert_eq!(body, r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#);
     }
 
     #[tokio::test]
