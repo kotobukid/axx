@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
+import UserList from "./components/UserList.vue";
 </script>
 
 <template lang="pug">
-div
-    a(href="https://vitejs.dev" target="_blank")
-        img.logo(src="/vite.svg" alt="Vite logo")
-    a(href="https://vuejs.org/" target="_blank")
-        img.logo.vue(src="./assets/vue.svg" alt="Vue logo")
-
+UserList
 HelloWorld(msg="Vite + Vue")
 </template>
 

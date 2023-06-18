@@ -1,4 +1,5 @@
 mod auth;
+mod api;
 
 use axum::{routing::{get, post}, Router, http::{StatusCode}, response::{IntoResponse, Html}, Json};
 
@@ -6,6 +7,7 @@ use std::net::SocketAddr;
 use std::env;
 
 use tower_http::services::ServeDir;
+use crate::api::user_list;
 use crate::auth::{create_user, login_form, login_process};
 
 
@@ -31,7 +33,11 @@ fn create_app() -> Router {
     Router::new()
         // .route("/", get(root))
         .route("/users", post(create_user))
-        .route("/api/json_sample", get(api_sample))
+        // .route("/api/json_sample", get(api_sample))
+        .nest("/api", Router::new()
+            .route("/json_sample", get(api_sample))
+            .route("/users", get(user_list))
+        )
         .route("/login/", get(login_form).post(login_process))
         .nest_service("/", ServeDir::new("../vite-project/dist"))
 }
