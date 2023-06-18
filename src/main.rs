@@ -1,10 +1,6 @@
 mod auth;
-use axum::{
-    routing::{get, post},
-    Router,
-    http::{StatusCode},
-    response::{IntoResponse, Html},
-};
+
+use axum::{routing::{get, post}, Router, http::{StatusCode}, response::{IntoResponse, Html}, Json};
 
 use std::net::SocketAddr;
 use std::env;
@@ -35,12 +31,21 @@ fn create_app() -> Router {
     Router::new()
         .route("/", get(root))
         .route("/users", post(create_user))
+        .route("/api/json_sample", get(api_sample))
         .route("/login/", get(login_form).post(login_process))
         .nest_service("/static", ServeDir::new("static"))
 }
 
 async fn root() -> impl IntoResponse {
     (StatusCode::OK, Html(r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#))
+}
+
+async fn api_sample() -> impl IntoResponse {
+    let user = auth::User {
+        id: 1338,
+        username: "Taro".into(),
+    };
+    (StatusCode::OK, Json(user))
 }
 
 #[cfg(test)]
