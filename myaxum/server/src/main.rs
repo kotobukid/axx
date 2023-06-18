@@ -33,7 +33,7 @@ fn create_app() -> Router {
         .route("/users", post(create_user))
         .route("/api/json_sample", get(api_sample))
         .route("/login/", get(login_form).post(login_process))
-        .nest_service("/static", ServeDir::new("static"))
+        .nest_service("/static", ServeDir::new("../static"))
 }
 
 async fn root() -> impl IntoResponse {
