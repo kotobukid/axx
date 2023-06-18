@@ -1,5 +1,11 @@
-import { createApp } from 'vue'
+import {createApp} from 'vue'
 import './style.css'
 import App from './App.vue'
+import axios, {type AxiosResponse} from "axios"
 
-createApp(App).mount('#app')
+axios.get('/api/json_sample').then((res: AxiosResponse<{ username: string, id: number }>): void => {
+    console.log(res.data.id)
+    console.log(res.data.username)
+    createApp(App).mount('#app')
+});
+

@@ -29,16 +29,16 @@ async fn main() {
 
 fn create_app() -> Router {
     Router::new()
-        .route("/", get(root))
+        // .route("/", get(root))
         .route("/users", post(create_user))
         .route("/api/json_sample", get(api_sample))
         .route("/login/", get(login_form).post(login_process))
-        .nest_service("/static", ServeDir::new("../static"))
+        .nest_service("/", ServeDir::new("../vite-project/dist"))
 }
 
-async fn root() -> impl IntoResponse {
-    (StatusCode::OK, Html(r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#))
-}
+// async fn root() -> impl IntoResponse {
+//     (StatusCode::OK, Html(r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#))
+// }
 
 async fn api_sample() -> impl IntoResponse {
     let user = auth::User {
@@ -58,16 +58,16 @@ mod test {
     use tower::ServiceExt;
     use crate::auth::User;
 
-    #[tokio::test]
-    async fn should_return_hello_world() {
-        let req = Request::builder().uri("/").body(Body::empty()).unwrap();
-        let res = create_app().oneshot(req).await.unwrap();
-
-        let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
-
-        let body: String = String::from_utf8(bytes.to_vec()).unwrap();
-        assert_eq!(body, r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#);
-    }
+    // #[tokio::test]
+    // async fn should_return_hello_world() {
+    //     let req = Request::builder().uri("/").body(Body::empty()).unwrap();
+    //     let res = create_app().oneshot(req).await.unwrap();
+    //
+    //     let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
+    //
+    //     let body: String = String::from_utf8(bytes.to_vec()).unwrap();
+    //     assert_eq!(body, r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#);
+    // }
 
     #[tokio::test]
     async fn should_return_user_data() {
