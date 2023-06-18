@@ -37,7 +37,7 @@ fn create_app() -> Router {
 }
 
 // async fn root() -> impl IntoResponse {
-//     (StatusCode::OK, Html(r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#))
+//     (StatusCode::OK, Html(r#"<link rel="stylesheet" href="/static/style.less" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#))
 // }
 
 async fn api_sample() -> impl IntoResponse {
@@ -66,7 +66,7 @@ mod test {
     //     let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
     //
     //     let body: String = String::from_utf8(bytes.to_vec()).unwrap();
-    //     assert_eq!(body, r#"<link rel="stylesheet" href="/static/style.css" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#);
+    //     assert_eq!(body, r#"<link rel="stylesheet" href="/static/style.less" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#);
     // }
 
     #[tokio::test]
