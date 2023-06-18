@@ -1,14 +1,15 @@
 mod auth;
 mod api;
 
-use axum::{routing::{get, post}, Router, http::{StatusCode}, response::{IntoResponse}, Json};
+use axum::{routing::{get, post}, Router, http::{StatusCode}, response::{IntoResponse}, Json, Extension};
 
 use std::net::SocketAddr;
 use std::env;
+use std::sync::Arc;
 
 use tower_http::services::ServeDir;
 use crate::api::user_list;
-use crate::auth::{create_user, login_form, login_process};
+use crate::auth::{create_user, login_form, login_process, TodoRepository, TodoRepositoryForMemory};
 
 
 #[tokio::main]
@@ -19,7 +20,9 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
 
-    let app = create_app();
+    let repository = TodoRepositoryForMemory::new();
+    let app = create_app(repository);
+
     let addr: SocketAddr = SocketAddr::from(([192, 168, 33, 10], 3000));
     tracing::debug!("listening on {}", addr);
 
@@ -29,17 +32,18 @@ async fn main() {
         .unwrap();
 }
 
-fn create_app() -> Router {
+fn create_app<T: TodoRepository>(repository: T) -> Router {
     Router::new()
         // .route("/", get(root))
         .route("/users", post(create_user))
         // .route("/api/json_sample", get(api_sample))
         .nest("/api", Router::new()
             .route("/json_sample", get(api_sample))
-            .route("/users", get(user_list))
+            .route("/users", get(user_list)),
         )
         .route("/login/", get(login_form).post(login_process))
         .nest_service("/", ServeDir::new("../vite-project/dist"))
+        .layer(Extension(Arc::new(repository)))
 }
 
 // async fn root() -> impl IntoResponse {
@@ -81,7 +85,9 @@ mod test {
             .header(header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
             .body(Body::from(r#"{ "username": "田中 太郎"}"#)).unwrap();
 
-        let res = create_app().oneshot(req).await.unwrap();
+        let repository = TodoRepositoryForMemory::new();
+
+        let res = create_app(repository).oneshot(req).await.unwrap();
 
         let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
 

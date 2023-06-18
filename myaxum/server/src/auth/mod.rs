@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use axum::{
+    extract::Extension,
     response::{Html, IntoResponse},
     extract::Form,
     Json,
@@ -54,9 +55,9 @@ enum RepositoryError {
     NotFound(i32),
 }
 
-pub trait TodoRepository: Clone + std::marker::Send + std::marker::Sync + 'static {
+pub trait TodoRepository: Clone + Send + Sync + 'static {
     fn create(&self, payload: CreateTodo) -> Todo;
-    fn find(&self, payload: CreateTodo) -> Todo;
+    fn find(&self, id: i32) -> Option<Todo>;
     fn all(&self) -> Vec<Todo>;
     fn update(&self, id: i32, payload: UpdateTodo) -> anyhow::Result<Todo>;
     fn delete(&self, id: i32) -> anyhow::Result<()>;
@@ -125,4 +126,13 @@ impl TodoRepository for TodoRepositoryForMemory {
     fn delete(&self, id: i32) -> anyhow::Result<()> {
         todo!();
     }
+}
+
+pub async fn create_todo<T: TodoRepository>(
+    Json(payload): Json<CreateTodo>,
+    Extension(repository): Extension<Arc<T>>,
+) -> impl IntoResponse {
+    let todo = repository.create(payload);
+
+    (StatusCode::CREATED, Json(todo))
 }
