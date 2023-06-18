@@ -4,7 +4,6 @@ use axum::Json;
 use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Serialize, Deserialize)]
 pub struct Users {
     users: Vec<User>,

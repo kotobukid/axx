@@ -13,3 +13,30 @@ content-type: application/json
 ### over Vite proxy
 GET http://192.168.33.10:3001/api/json_sample
 
+###
+POST http://192.168.33.10:3001/api/todos
+content-type: application/json
+
+{"text": "Say hello world"}
+
+###
+GET http://192.168.33.10:3001/api/todos
+
+###
+GET http://192.168.33.10:3001/api/todos/1
+
+
+###
+PATCH http://192.168.33.10:3001/api/todos/1
+content-type: application/json
+
+{"text": "say goodbye"}
+
+###
+DELETE http://192.168.33.10:3001/api/todos/1
+
+
+
+
+
+

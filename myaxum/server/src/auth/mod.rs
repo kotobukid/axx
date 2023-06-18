@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use axum::{
-    extract::Extension,
     response::{Html, IntoResponse},
     extract::Form,
     Json,
@@ -153,15 +152,6 @@ impl TodoRepository for TodoRepositoryForMemory {
         store.remove(&id).ok_or(RepositoryError::NotFound(id))?;
         Ok(())
     }
-}
-
-pub async fn create_todo<T: TodoRepository>(
-    Json(payload): Json<CreateTodo>,
-    Extension(repository): Extension<Arc<T>>,
-) -> impl IntoResponse {
-    let todo = repository.create(payload);
-
-    (StatusCode::CREATED, Json(todo))
 }
 
 #[cfg(test)]

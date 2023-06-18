@@ -1,7 +1,19 @@
 mod auth;
 mod api;
+mod handlers;
 
-use axum::{routing::{get, post}, Router, http::{StatusCode}, response::{IntoResponse}, Json, Extension};
+use axum::{
+    routing::{
+        get,
+        post,
+    },
+    Router,
+    http::{StatusCode},
+    response::{IntoResponse},
+    Json,
+    Extension,
+    extract::{Path},
+};
 
 use std::net::SocketAddr;
 use std::env;
@@ -9,8 +21,8 @@ use std::sync::Arc;
 
 use tower_http::services::ServeDir;
 use crate::api::user_list;
-use crate::auth::{create_user, login_form, login_process, TodoRepository, TodoRepositoryForMemory};
-
+use crate::auth::{create_user, CreateTodo, login_form, login_process, TodoRepository, TodoRepositoryForMemory, UpdateTodo};
+use crate::handlers::{all_todo, create_todo, delete_todo, find_todo, update_todo};
 
 #[tokio::main]
 async fn main() {
@@ -21,7 +33,7 @@ async fn main() {
 
 
     let repository = TodoRepositoryForMemory::new();
-    let app = create_app(repository);
+    let app = create_app(repository.into());
 
     let addr: SocketAddr = SocketAddr::from(([192, 168, 33, 10], 3000));
     tracing::debug!("listening on {}", addr);
@@ -32,18 +44,42 @@ async fn main() {
         .unwrap();
 }
 
-fn create_app<T: TodoRepository>(repository: T) -> Router {
+fn create_app<T: TodoRepository>(repository: Arc<T>) -> Router {
+    let todo_repository = Arc::clone(&repository);
+
     Router::new()
         // .route("/", get(root))
         .route("/users", post(create_user))
         // .route("/api/json_sample", get(api_sample))
         .nest("/api", Router::new()
             .route("/json_sample", get(api_sample))
-            .route("/users", get(user_list)),
+            .route("/users", get(user_list))
+            .route("/todos",
+                   post({
+                       let todo_repository = Arc::clone(&todo_repository);
+                       move |payload: Json<CreateTodo>| create_todo(payload, Extension(todo_repository))
+                   })
+                       .get({
+                           let todo_repository = Arc::clone(&todo_repository);
+                           move || all_todo(Extension(todo_repository))
+                       }))
+            .route("/todos/:id", get({
+                let todo_repository = Arc::clone(&todo_repository);
+                move |id: Path<i32>| find_todo(id, Extension(todo_repository))
+            })
+                .delete({
+                    let todo_repository = Arc::clone(&todo_repository);
+                    move |id: Path<i32>| delete_todo(id, Extension(todo_repository))
+                })
+                .patch({
+                    let todo_repository = Arc::clone(&todo_repository);
+                    move |id: Path<i32>, payload: Json<UpdateTodo>| update_todo(id, payload, Extension(todo_repository))
+                }),
+            ),
+              // ).layer(Extension(Arc::new(todo_repository))),
         )
         .route("/login/", get(login_form).post(login_process))
         .nest_service("/", ServeDir::new("../vite-project/dist"))
-        .layer(Extension(Arc::new(repository)))
 }
 
 // async fn root() -> impl IntoResponse {
@@ -87,7 +123,7 @@ mod test {
 
         let repository = TodoRepositoryForMemory::new();
 
-        let res = create_app(repository).oneshot(req).await.unwrap();
+        let res = create_app(repository.into()).oneshot(req).await.unwrap();
 
         let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
 
