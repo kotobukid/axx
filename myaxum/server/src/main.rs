@@ -1,7 +1,7 @@
 mod auth;
 mod api;
 
-use axum::{routing::{get, post}, Router, http::{StatusCode}, response::{IntoResponse, Html}, Json};
+use axum::{routing::{get, post}, Router, http::{StatusCode}, response::{IntoResponse}, Json};
 
 use std::net::SocketAddr;
 use std::env;
