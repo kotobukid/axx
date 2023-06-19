@@ -2,3 +2,5 @@
 .idea
 vite-project/node_modules
 /myaxum/server/config.toml
+/network-config.yaml
+/vite-project/.env
