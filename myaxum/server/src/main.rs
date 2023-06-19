@@ -2,6 +2,7 @@ mod auth;
 mod api;
 mod handlers;
 
+use std::collections::HashMap;
 use axum::{
     routing::{
         get,
@@ -18,24 +19,58 @@ use axum::{
 use std::net::SocketAddr;
 use std::env;
 use std::sync::Arc;
+use std::str::FromStr;
+use config::{Config, File};
+use serde::Deserialize;
+use std::convert::TryFrom;
 
 use tower_http::services::ServeDir;
 use crate::api::user_list;
 use crate::auth::{create_user, CreateTodo, login_form, login_process, TodoRepository, TodoRepositoryForMemory, UpdateTodo};
 use crate::handlers::{all_todo, create_todo, delete_todo, find_todo, update_todo};
 
+#[derive(Debug, Deserialize)]
+struct Settings {
+    host: String,
+    port: u16,
+}
+
+impl TryFrom<Config> for Settings {
+    type Error = config::ConfigError;
+
+    fn try_from(config: Config) -> Result<Self, Self::Error> {
+        config.try_into()
+    }
+}
+
 #[tokio::main]
 async fn main() {
+    let settings = Config::builder()
+        // Add in `./Settings.toml`
+        .add_source(config::File::with_name("config"))
+        // Add in settings from the environment (with a prefix of APP)
+        // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
+        // .add_source(config::Environment::with_prefix("APP"))
+        .build()
+        .unwrap();
+
+    let s = settings
+        .try_deserialize::<HashMap<String, String>>()
+        .unwrap();
+
+
     let log_level = env::var("RUST_LOG").unwrap_or("info".to_string());
 
     env::set_var("RUST_LOG", log_level);
     tracing_subscriber::fmt::init();
 
-
     let repository = TodoRepositoryForMemory::new();
     let app = create_app(repository.into());
 
-    let addr: SocketAddr = SocketAddr::from(([192, 168, 33, 10], 3000));
+    let addr = SocketAddr::from_str(&format!("{}:{}", s.get("host").unwrap(), 3000))
+        .expect("Invalid address");
+
+    println!("{}", addr);
     tracing::debug!("listening on {}", addr);
 
     axum::Server::bind(&addr)
