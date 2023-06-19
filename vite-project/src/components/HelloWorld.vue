@@ -9,7 +9,25 @@ const increment = (delta: number) => {
     count.value = count.value + delta;
 }
 const reset = () => {
-    count.value = 0;
+    if (count.value > 0) {
+        let next: number = count.value;
+        let delta: number = 1;
+        if (next > 60) {
+            delta = 60;
+        }
+
+        const interval = 380 / delta;
+
+        const timer = setInterval(() => {
+            next = next - delta;
+            if (next < 1) {
+                count.value = 0;
+                clearInterval(timer);
+            } else {
+                count.value = count.value - delta;
+            }
+        }, interval);
+    }
 }
 </script>
 
@@ -18,6 +36,7 @@ h1 {{ msg }}
 
 .card
     button(type="button" @click="increment(1)") count is {{ count }}
+    button(type="button" @click="increment(100)") count is {{ count }}
     a(href="#" @click.prevent="reset") RESET
     p
         span Edit
