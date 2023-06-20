@@ -86,14 +86,14 @@ async fn main() {
 fn create_app<T: TodoRepository>(repository: Arc<T>) -> Router {
     let todo_repository = Arc::clone(&repository);
 
-    let mut api_router = get_api_router(repository);
+    let api_router = get_api_router(repository);
 
     // 個別にルーティングを外付け
     let api_router_c = api_router.clone().route("/json_sample", get(api_sample));
 
     Router::new()
         .route("/users", post(create_user))
-        .nest("/api", api_router)
+        .nest("/api", api_router_c)
         .route("/login/", get(login_form).post(login_process))
         .nest_service("/", ServeDir::new("../vite-project/dist"))
 }
