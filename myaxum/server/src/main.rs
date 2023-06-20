@@ -64,13 +64,15 @@ async fn main() {
     env::set_var("RUST_LOG", log_level);
     tracing_subscriber::fmt::init();
 
+    let port = 3000;
+
     let repository = TodoRepositoryForMemory::new();
     let app = create_app(repository.into());
 
-    let addr = SocketAddr::from_str(&format!("{}:{}", s.get("host").unwrap(), 3000))
+    let addr = SocketAddr::from_str(&format!("{}:{}", s.get("host").unwrap(), port))
         .expect("Invalid address");
 
-    println!("{}", addr);
+    println!("http://{addr}");
     tracing::debug!("listening on {}", addr);
 
     axum::Server::bind(&addr)
