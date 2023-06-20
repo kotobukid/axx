@@ -7,5 +7,6 @@ axios.get('/api/json_sample').then((res: AxiosResponse<{ username: string, id: n
     console.log(res.data.id)
     console.log(res.data.username)
     createApp(App).mount('#app')
+}).catch((): void => {
+    createApp(App).mount('#app')
 });
-

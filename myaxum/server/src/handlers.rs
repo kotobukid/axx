@@ -3,8 +3,11 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
     Json,
+    Router,
+    routing::{get, post},
 };
 use std::sync::Arc;
+use crate::api::user_list;
 
 use crate::auth::{CreateTodo, TodoRepository, UpdateTodo};
 
@@ -47,4 +50,35 @@ pub async fn delete_todo<T: TodoRepository>(
     repository.delete(id)
         .map(|_| StatusCode::NO_CONTENT)
         .unwrap_or(StatusCode::NOT_FOUND)
+}
+
+pub fn get_api_router<T: TodoRepository>(repository: Arc<T>) -> Router {
+    let todo_repository = Arc::clone(&repository);
+
+    Router::new()
+        .route("/users", get(user_list))
+        .route("/todos",
+               post({
+                   let todo_repository = Arc::clone(&todo_repository);
+                   move |payload: Json<CreateTodo>| create_todo(payload, Extension(todo_repository))
+               })
+                   .get({
+                       let todo_repository = Arc::clone(&todo_repository);
+                       move || all_todo(Extension(todo_repository))
+                   }))
+        .route("/todos/:id", get({
+            let todo_repository = Arc::clone(&todo_repository);
+            move |id: Path<i32>| find_todo(id, Extension(todo_repository))
+        })
+            .delete({
+                let todo_repository = Arc::clone(&todo_repository);
+                move |id: Path<i32>| delete_todo(id, Extension(todo_repository))
+            })
+            .patch({
+                let todo_repository = Arc::clone(&todo_repository);
+                move |id: Path<i32>, payload: Json<UpdateTodo>| update_todo(id, payload, Extension(todo_repository))
+            }),
+        )
+        // ジェネリクスの疑問解決まではクロージャで回避すべくコメントアウト
+        // .layer(Extension(Arc::new(todo_repository))),
 }

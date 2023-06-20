@@ -20,14 +20,14 @@ use std::net::SocketAddr;
 use std::env;
 use std::sync::Arc;
 use std::str::FromStr;
-use config::{Config, File};
+use config::{Config};
 use serde::Deserialize;
 use std::convert::TryFrom;
 
 use tower_http::services::ServeDir;
-use crate::api::user_list;
+
 use crate::auth::{create_user, CreateTodo, login_form, login_process, TodoRepository, TodoRepositoryForMemory, UpdateTodo};
-use crate::handlers::{all_todo, create_todo, delete_todo, find_todo, update_todo};
+use crate::handlers::{all_todo, create_todo, delete_todo, find_todo, get_api_router, update_todo};
 
 #[derive(Debug, Deserialize)]
 struct Settings {
@@ -84,37 +84,14 @@ async fn main() {
 fn create_app<T: TodoRepository>(repository: Arc<T>) -> Router {
     let todo_repository = Arc::clone(&repository);
 
+    let mut api_router = get_api_router(repository);
+
+    // 個別にルーティングを外付け
+    let api_router_c = api_router.clone().route("/json_sample", get(api_sample));
+
     Router::new()
-        // .route("/", get(root))
         .route("/users", post(create_user))
-        // .route("/api/json_sample", get(api_sample))
-        .nest("/api", Router::new()
-            .route("/json_sample", get(api_sample))
-            .route("/users", get(user_list))
-            .route("/todos",
-                   post({
-                       let todo_repository = Arc::clone(&todo_repository);
-                       move |payload: Json<CreateTodo>| create_todo(payload, Extension(todo_repository))
-                   })
-                       .get({
-                           let todo_repository = Arc::clone(&todo_repository);
-                           move || all_todo(Extension(todo_repository))
-                       }))
-            .route("/todos/:id", get({
-                let todo_repository = Arc::clone(&todo_repository);
-                move |id: Path<i32>| find_todo(id, Extension(todo_repository))
-            })
-                .delete({
-                    let todo_repository = Arc::clone(&todo_repository);
-                    move |id: Path<i32>| delete_todo(id, Extension(todo_repository))
-                })
-                .patch({
-                    let todo_repository = Arc::clone(&todo_repository);
-                    move |id: Path<i32>, payload: Json<UpdateTodo>| update_todo(id, payload, Extension(todo_repository))
-                }),
-            ),
-              // ).layer(Extension(Arc::new(todo_repository))),
-        )
+        .nest("/api", api_router)
         .route("/login/", get(login_form).post(login_process))
         .nest_service("/", ServeDir::new("../vite-project/dist"))
 }
