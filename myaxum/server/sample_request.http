@@ -1,41 +1,46 @@
 ### post create user
-POST http://192.168.33.10:3000/users
+POST http://{{ origin }}/users
 content-type: application/json
 
-{"username": "taro"}
+{
+  "username": "taro"
+}
 
 ### post create user invalid json
-POST http://192.168.33.10:3000/users
+POST http://{{ origin }}/users
 content-type: application/json
 
-{"username": "taro}
+{
+  "username": "taro}
 
 ### over Vite proxy
-GET http://192.168.33.10:3001/api/json_sample
+GET http://{{ origin }}/api/json_sample
 
 ###
-POST http://192.168.33.10:3001/api/todos
+POST http://{{ origin_vite }}/api/todos
 content-type: application/json
 
-{"text": "Say hello world"}
+{
+  "text": "Say hello world"
+}
 
 ###
-GET http://192.168.33.10:3001/api/todos
+GET http://{{ origin_vite }}/api/todos
 
 ###
-GET http://192.168.33.10:3001/api/todos/1
+GET http://{{ origin_vite }}/api/todos/1
 
 
 ###
-PATCH http://192.168.33.10:3001/api/todos/1
+PATCH http://{{ origin_vite }}/api/todos/1
 content-type: application/json
 
-{"text": "say goodbye"}
+{
+  "text": "say goodbye"
+}
 
 ###
-DELETE http://192.168.33.10:3001/api/todos/1
-
-
+DELETE http://{{ origin_vite }}/api/todos/1
 
 
 
