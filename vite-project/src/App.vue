@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
 import UserList from "./components/UserList.vue";
+import TodoList from "./components/TodoList.vue";
 </script>
 
 <template lang="pug">
+TodoList
 UserList
 HelloWorld(msg="Vite + Vue")
 </template>
