@@ -8,8 +8,7 @@ use axum::{
 };
 use std::sync::Arc;
 use crate::api::user_list;
-
-use crate::auth::{CreateTodo, TodoRepository, UpdateTodo};
+use crate::todo::{CreateTodo, TodoRepository, UpdateTodo};
 
 pub async fn create_todo<T: TodoRepository>(
     Json(payload): Json<CreateTodo>,

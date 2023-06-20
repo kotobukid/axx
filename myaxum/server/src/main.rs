@@ -1,6 +1,7 @@
 mod auth;
 mod api;
 mod handlers;
+mod todo;
 
 use std::collections::HashMap;
 use axum::{
@@ -26,8 +27,9 @@ use std::convert::TryFrom;
 
 use tower_http::services::ServeDir;
 
-use crate::auth::{create_user, CreateTodo, login_form, login_process, TodoRepository, TodoRepositoryForMemory, UpdateTodo};
+use crate::auth::{create_user, login_form, login_process};
 use crate::handlers::{all_todo, create_todo, delete_todo, find_todo, get_api_router, update_todo};
+use crate::todo::{TodoRepositoryForMemory, TodoRepository};
 
 #[derive(Debug, Deserialize)]
 struct Settings {
