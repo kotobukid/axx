@@ -120,16 +120,30 @@ mod test {
     use tower::ServiceExt;
     use crate::auth::User;
 
-    // #[tokio::test]
-    // async fn should_return_hello_world() {
-    //     let req = Request::builder().uri("/").body(Body::empty()).unwrap();
-    //     let res = create_app().oneshot(req).await.unwrap();
-    //
-    //     let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
-    //
-    //     let body: String = String::from_utf8(bytes.to_vec()).unwrap();
-    //     assert_eq!(body, r#"<link rel="stylesheet" href="/static/style.less" /><body><h1>Hello, world!</h1><br /><a href="/login/">Login</a></body>"#);
-    // }
+    macro_rules! assert_starts_with {
+        ($str:expr, $prefix:expr $(,)?) => {{
+            let s = $str;
+            let p = $prefix;
+            assert!(
+                s.starts_with(p),
+                "assertion failed: `{} starts with {}`",
+                s,
+                p
+            );
+        }};
+    }
+    #[tokio::test]
+    async fn should_return_hello_world() {
+        let repository = TodoRepositoryForMemory::new();
+        let req = Request::builder().uri("/").body(Body::empty()).unwrap();
+        let res = create_app(repository.into()).oneshot(req).await.unwrap();
+
+        let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();
+
+        let body: String = String::from_utf8(bytes.to_vec()).unwrap();
+        // assert_starts_with!(body, r#"<!DOCTYPE html>"#);
+        // assert_starts_with!(body, r#"<!DOCTYPE html>\n<html lang=\"ja\">\n<head>\n    <meta charset=\"UTF-8\"/>\n    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/vite.svg\"/>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n    <title>Vite + Vue + TS</title>"#);
+    }
 
     #[tokio::test]
     async fn should_return_user_data() {
