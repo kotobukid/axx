@@ -40,7 +40,7 @@ content-type: application/json
 }
 
 ###
-DELETE http://{{ origin_vite }}/api/todos/1
+DELETE http://{{ origin_vite }}/api/todos/10
 
 
 
