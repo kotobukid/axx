@@ -26,7 +26,7 @@ def generate_ssh_config(uuid_str):
     sshConfig.set("useOpenSSHConfig", "true")
 
     tree = ET.ElementTree(root)
-    tree.write("../.idea/sshConfigs.xml")
+    tree.write("./.idea/sshConfigs.xml")
 
 def generate_web_servers(uuid_str):
     root = ET.Element("project")
@@ -59,7 +59,7 @@ def generate_web_servers(uuid_str):
     advancedOptions.set("shareSSLContext", "true")
 
     tree = ET.ElementTree(root)
-    tree.write("../.idea/webServers.xml")
+    tree.write("./.idea/webServers.xml")
 
 uuid_str = str(uuid.uuid4())
 generate_ssh_config(uuid_str)

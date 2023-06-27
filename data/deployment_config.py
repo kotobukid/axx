@@ -65,7 +65,7 @@ component.appendChild(option)
 
 # Create an xml tree and save it to a file
 xml_str = doc.toprettyxml(indent="  ")
-with open("../.idea/deployment.xml", "w") as f:
+with open("./.idea/deployment.xml", "w") as f:
     f.write(xml_str)
 
 print("config file is generated.")
