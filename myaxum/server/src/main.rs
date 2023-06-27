@@ -24,12 +24,13 @@ use std::str::FromStr;
 use config::{Config};
 use serde::Deserialize;
 use std::convert::TryFrom;
-
+use sqlx::PgPool;
+use dotenv::dotenv;
 use tower_http::services::ServeDir;
 
 use crate::auth::{create_user, login_form, login_process};
 use crate::handlers::{all_todo, create_todo, delete_todo, find_todo, get_api_router, update_todo};
-use crate::todo::{TodoRepositoryForMemory, TodoRepository};
+use crate::todo::{TodoRepositoryForMemory, TodoRepository, TodoRepositoryForDb};
 
 #[derive(Debug, Deserialize)]
 struct Settings {
@@ -67,8 +68,15 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     let port = 3000;
+    dotenv().ok();
 
-    let repository = TodoRepositoryForMemory::new();
+    let database_url = &env::var("DATABASE_URL").expect("undefined [DATABASE_URL]");
+
+    let pool = PgPool::connect(database_url)
+        .await
+        .expect(&format!("fail connect database, url is [{}]", database_url));
+
+    let repository = TodoRepositoryForDb::new(pool);
     let app = create_app(repository.into());
 
     let addr = SocketAddr::from_str(&format!("{}:{}", s.get("host").unwrap(), port))
