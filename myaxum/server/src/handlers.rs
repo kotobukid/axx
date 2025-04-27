@@ -66,28 +66,28 @@ pub fn get_api_router<T: TodoRepository>(repository: Arc<T>) -> Router {
 
     Router::new()
         .route("/users", get(user_list))
-        .route("/todos",
-               post({
-                   let todo_repository = Arc::clone(&todo_repository);
-                   move |payload: Json<CreateTodo>| create_todo(payload, Extension(todo_repository))
-               })
-                   .get({
-                       let todo_repository = Arc::clone(&todo_repository);
-                       move || all_todo(Extension(todo_repository))
-                   }))
-        .route("/todos/:id", get({
-            let todo_repository = Arc::clone(&todo_repository);
-            move |id: Path<i32>| find_todo(id, Extension(todo_repository))
-        })
-            .delete({
-                let todo_repository = Arc::clone(&todo_repository);
-                move |id: Path<i32>| delete_todo(id, Extension(todo_repository))
-            })
-            .patch({
-                let todo_repository = Arc::clone(&todo_repository);
-                move |id: Path<i32>, payload: Json<UpdateTodo>| update_todo(id, payload, Extension(todo_repository))
-            }),
-        )
+        // .route("/todos",
+        //        post({
+        //            let todo_repository = Arc::clone(&todo_repository);
+        //            move |payload: Json<CreateTodo>| create_todo(payload, Extension(todo_repository))
+        //        })
+        //            .get({
+        //                let todo_repository = Arc::clone(&todo_repository);
+        //                move || all_todo(Extension(todo_repository))
+        //            }))
+        // .route("/todos/:id", get({
+        //     let todo_repository = Arc::clone(&todo_repository);
+        //     move |id: Path<i32>| find_todo(id, Extension(todo_repository))
+        // })
+        //     .delete({
+        //         let todo_repository = Arc::clone(&todo_repository);
+        //         move |id: Path<i32>| delete_todo(id, Extension(todo_repository))
+        //     })
+            // .patch({
+            //     let todo_repository = Arc::clone(&todo_repository);
+            //     move |id: Path<i32>, payload: Json<UpdateTodo>| update_todo(id, payload, Extension(todo_repository))
+            // }),
+        // )
         // ジェネリクスの疑問解決まではクロージャで回避すべくコメントアウト
         // .layer(Extension(Arc::new(todo_repository))),
 }

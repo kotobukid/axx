@@ -5,7 +5,6 @@ use axum::{
     extract::Form,
     Json,
     http::{StatusCode},
-    async_trait,
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -20,7 +19,6 @@ enum RepositoryError {
     NotFound(i32),
 }
 
-#[async_trait]
 pub trait TodoRepository: Clone + Send + Sync + 'static {
     async fn create(&self, payload: CreateTodo) -> anyhow::Result<Todo>;
     async fn find(&self, id: i32) -> anyhow::Result<Todo>;
@@ -80,7 +78,6 @@ impl TodoRepositoryForMemory {
     }
 }
 
-#[async_trait]
 impl TodoRepository for TodoRepositoryForMemory {
     async fn create(&self, payload: CreateTodo) -> anyhow::Result<Todo> {
         let mut store = self.write_store_ref();
@@ -139,7 +136,6 @@ impl TodoRepositoryForDb {
     }
 }
 
-#[async_trait]
 impl TodoRepository for TodoRepositoryForDb {
     async fn create(&self, payload: CreateTodo) -> anyhow::Result<Todo> {
         let todo = sqlx::query_as::<_, Todo>(

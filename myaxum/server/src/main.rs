@@ -84,11 +84,10 @@ async fn main() {
 
     println!("http://{addr}");
     tracing::debug!("listening on {}", addr);
+    
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
 
 fn create_app<T: TodoRepository>(repository: Arc<T>) -> Router {
