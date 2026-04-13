@@ -4,7 +4,7 @@ use axum::{
     response::IntoResponse,
     Json,
     Router,
-    routing::{get, post},
+    routing::get,
 };
 use std::sync::Arc;
 use crate::api::user_list;
@@ -62,7 +62,7 @@ pub async fn delete_todo<T: TodoRepository>(
 }
 
 pub fn get_api_router<T: TodoRepository>(repository: Arc<T>) -> Router {
-    let todo_repository = Arc::clone(&repository);
+    let _todo_repository = Arc::clone(&repository);
 
     Router::new()
         .route("/users", get(user_list))

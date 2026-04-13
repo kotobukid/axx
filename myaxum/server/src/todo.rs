@@ -1,11 +1,5 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
-use axum::{
-    response::{Html, IntoResponse},
-    extract::Form,
-    Json,
-    http::{StatusCode},
-};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use anyhow::Context;
@@ -69,11 +63,11 @@ impl TodoRepositoryForMemory {
         }
     }
 
-    fn write_store_ref(&self) -> RwLockWriteGuard<TodoDatas> {
+    fn write_store_ref(&self) -> RwLockWriteGuard<'_, TodoDatas> {
         self.store.write().unwrap()
     }
 
-    fn read_store_ref(&self) -> RwLockReadGuard<TodoDatas> {
+    fn read_store_ref(&self) -> RwLockReadGuard<'_, TodoDatas> {
         self.store.read().unwrap()
     }
 }
@@ -91,15 +85,14 @@ impl TodoRepository for TodoRepositoryForMemory {
         let store = self.read_store_ref();
 
         let todo = store
-            .get(&id)
-            .map(|todo| todo.clone())
+            .get(&id).cloned()
             .ok_or(RepositoryError::NotFound(id))?;
         Ok(todo)
     }
 
     async fn all(&self) -> anyhow::Result<Vec<Todo>> {
         let store = self.read_store_ref();
-        Ok(Vec::from_iter(store.values().map(|todo| todo.clone())))
+        Ok(Vec::from_iter(store.values().cloned()))
     }
 
     async fn update(&self, id: i32, payload: UpdateTodo) -> anyhow::Result<Todo> {

@@ -13,8 +13,6 @@ use axum::{
     http::{StatusCode},
     response::{IntoResponse},
     Json,
-    Extension,
-    extract::{Path},
 };
 
 use std::net::SocketAddr;
@@ -29,8 +27,8 @@ use dotenv::dotenv;
 use tower_http::services::ServeDir;
 
 use crate::auth::{create_user, login_form, login_process};
-use crate::handlers::{all_todo, create_todo, delete_todo, find_todo, get_api_router, update_todo};
-use crate::todo::{TodoRepositoryForMemory, TodoRepository, TodoRepositoryForDb};
+use crate::handlers::get_api_router;
+use crate::todo::{TodoRepository, TodoRepositoryForDb};
 
 #[derive(Debug, Deserialize)]
 struct Settings {
@@ -74,7 +72,7 @@ async fn main() {
 
     let pool = PgPool::connect(database_url)
         .await
-        .expect(&format!("fail connect database, url is [{}]", database_url));
+        .unwrap_or_else(|_| panic!("fail connect database, url is [{}]", database_url));
 
     let repository = TodoRepositoryForDb::new(pool);
     let app = create_app(repository.into());
@@ -91,7 +89,7 @@ async fn main() {
 }
 
 fn create_app<T: TodoRepository>(repository: Arc<T>) -> Router {
-    let todo_repository = Arc::clone(&repository);
+    let _todo_repository = Arc::clone(&repository);
 
     let api_router = get_api_router(repository);
 
